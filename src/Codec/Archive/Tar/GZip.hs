@@ -13,7 +13,7 @@ import qualified Codec.Archive.Tar as Tar
 import qualified Codec.Compression.GZip as GZ
 import qualified Data.ByteString.Lazy as BS
 
--- | Create a new '.tar' file from a directory of files.
+-- | Create a new @.tar@ file from a directory of files.
 --
 -- It is equivalent to calling the standard 'tar' program like so:
 --
@@ -23,7 +23,7 @@ import qualified Data.ByteString.Lazy as BS
 createGZ :: FilePath -> FilePath -> [FilePath] -> IO ()
 createGZ tar base paths = BS.writeFile tar . GZ.compress . Tar.write =<< Tar.pack base paths
 
--- | Extract all the files contained in a '.tar' file.
+-- | Extract all the files contained in a @.tar@ file.
 --
 -- It is equivalent to calling the standard 'tar' program like so:
 --
