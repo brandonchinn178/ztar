@@ -20,7 +20,9 @@ import qualified Data.ByteString.Lazy as BS
 -- @$ tar -czf tarball.tar -C dir .@
 --
 -- See 'Tar.create' for more details.
-createGZ :: FilePath -> FilePath -> IO ()
+createGZ :: FilePath -- ^ tar archive
+         -> FilePath -- ^ directory to archive
+         -> IO ()
 createGZ tar dir = createGZ' tar dir ["."]
 
 -- | Create a new @.tar@ file from the given paths.
@@ -30,7 +32,10 @@ createGZ tar dir = createGZ' tar dir ["."]
 -- @$ tar -czf tarball.tar -C base paths@
 --
 -- See 'Tar.create' for more details.
-createGZ' :: FilePath -> FilePath -> [FilePath] -> IO ()
+createGZ' :: FilePath -- ^ tar archive
+          -> FilePath -- ^ base directory
+          -> [FilePath] -- ^ files and paths to compress, relative to base directory
+          -> IO ()
 createGZ' tar base paths = BS.writeFile tar . GZ.compress . Tar.write =<< Tar.pack base paths
 
 -- | Extract all the files contained in a @.tar@ file.
@@ -40,5 +45,7 @@ createGZ' tar base paths = BS.writeFile tar . GZ.compress . Tar.write =<< Tar.pa
 -- @$ tar -xzf tarball.tar -C dir@
 --
 -- See 'Tar.extract' for more details.
-extractGZ :: FilePath -> FilePath -> IO ()
+extractGZ :: FilePath -- ^ destination directory
+          -> FilePath -- ^ tar archive
+          -> IO ()
 extractGZ dir tar = Tar.unpack dir . Tar.read . GZ.decompress =<< BS.readFile tar
