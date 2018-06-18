@@ -13,16 +13,6 @@ import qualified Codec.Archive.Tar as Tar
 import qualified Codec.Compression.GZip as GZ
 import qualified Data.ByteString.Lazy as BS
 
--- | Create a new @.tar@ file from the given paths.
---
--- It is equivalent to calling the standard 'tar' program like so:
---
--- @$ tar -czf tarball.tar -C base [paths]@
---
--- See 'Tar.create' for more details.
-createGZ :: FilePath -> FilePath -> [FilePath] -> IO ()
-createGZ tar base paths = BS.writeFile tar . GZ.compress . Tar.write =<< Tar.pack base paths
-
 -- | Create a new @.tar@ file from the given directory.
 --
 -- It is equivalent to calling the standard 'tar' program like so:
@@ -30,8 +20,18 @@ createGZ tar base paths = BS.writeFile tar . GZ.compress . Tar.write =<< Tar.pac
 -- @$ tar -czf tarball.tar -C dir .@
 --
 -- See 'Tar.create' for more details.
-createGZ' :: FilePath -> FilePath -> IO ()
-createGZ' tar dir = createGZ tar dir ["."]
+createGZ :: FilePath -> FilePath -> IO ()
+createGZ tar dir = createGZ' tar dir ["."]
+
+-- | Create a new @.tar@ file from the given paths.
+--
+-- It is equivalent to calling the standard 'tar' program like so:
+--
+-- @$ tar -czf tarball.tar -C base [paths]@
+--
+-- See 'Tar.create' for more details.
+createGZ' :: FilePath -> FilePath -> [FilePath] -> IO ()
+createGZ' tar base paths = BS.writeFile tar . GZ.compress . Tar.write =<< Tar.pack base paths
 
 -- | Extract all the files contained in a @.tar@ file.
 --
