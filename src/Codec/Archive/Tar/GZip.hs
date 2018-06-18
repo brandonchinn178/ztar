@@ -27,7 +27,7 @@ createGZ tar dir = createGZ' tar dir ["."]
 --
 -- It is equivalent to calling the standard 'tar' program like so:
 --
--- @$ tar -czf tarball.tar -C base [paths]@
+-- @$ tar -czf tarball.tar -C base paths@
 --
 -- See 'Tar.create' for more details.
 createGZ' :: FilePath -> FilePath -> [FilePath] -> IO ()
