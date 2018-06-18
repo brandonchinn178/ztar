@@ -7,27 +7,37 @@ Portability :  portable
 Functions to create/extract compressed tar archives.
 -}
 
-module Codec.Archive.Tar.GZip (createGZ, extractGZ) where
+module Codec.Archive.Tar.GZip (createGZ, createGZ', extractGZ) where
 
 import qualified Codec.Archive.Tar as Tar
 import qualified Codec.Compression.GZip as GZ
 import qualified Data.ByteString.Lazy as BS
 
--- | Create a new @.tar@ file from a directory of files.
+-- | Create a new @.tar@ file from the given directory.
 --
 -- It is equivalent to calling the standard 'tar' program like so:
 --
--- @$ tar -f tarball.tar -C base -c dir -z@
+-- @$ tar -czf tarball.tar -C dir .@
 --
 -- See 'Tar.create' for more details.
-createGZ :: FilePath -> FilePath -> [FilePath] -> IO ()
-createGZ tar base paths = BS.writeFile tar . GZ.compress . Tar.write =<< Tar.pack base paths
+createGZ :: FilePath -> FilePath -> IO ()
+createGZ tar dir = createGZ' tar dir ["."]
+
+-- | Create a new @.tar@ file from the given paths.
+--
+-- It is equivalent to calling the standard 'tar' program like so:
+--
+-- @$ tar -czf tarball.tar -C base paths@
+--
+-- See 'Tar.create' for more details.
+createGZ' :: FilePath -> FilePath -> [FilePath] -> IO ()
+createGZ' tar base paths = BS.writeFile tar . GZ.compress . Tar.write =<< Tar.pack base paths
 
 -- | Extract all the files contained in a @.tar@ file.
 --
 -- It is equivalent to calling the standard 'tar' program like so:
 --
--- @$ tar -x -f tarball.tar -C dir -z@
+-- @$ tar -xzf tarball.tar -C dir@
 --
 -- See 'Tar.extract' for more details.
 extractGZ :: FilePath -> FilePath -> IO ()

@@ -8,7 +8,7 @@ import Path.IO (ensureDir, removeDirRecur, removeFile, withSystemTempDir)
 main :: IO ()
 main = withSystemTempDir "" $ \dir -> do
   mapM_ (mkFile dir) files
-  createGZ (fromRelFile archive) (fromAbsDir dir) ["."]
+  createGZ (fromRelFile archive) $ fromAbsDir dir
 
   extractGZ (fromRelDir extractDir) $ fromRelFile archive
   contents <- mapM (readFile . fromRelFile . (extractDir </>)) files
