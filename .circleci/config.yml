@@ -30,17 +30,25 @@ aliases:
         )
         cat "${FILES[@]}" > cache-key.txt
   - &cache-key
-    v2-{{ checksum "cache-key.txt" }}
+    v0-{{ checksum "cache-key.txt" }}
   - &install-stack-deps
     run:
       name: Build external dependencies
-      command: stack build --only-dependencies
+      command: stack build --test --only-dependencies
 
   # build steps
   - &run-build
     run:
       name: Build package
-      command: stack build ztar
+      command: stack build ztar --test --no-run-tests
+
+  # test steps
+  - &run-example-test
+    run:
+      name: Run example test
+      command: |
+        # call executable directly to avoid installing stack or any system dependencies
+        eval "$(find .stack-work -type f -name example)"
 
 jobs:
   prebuild:
@@ -74,6 +82,14 @@ jobs:
           paths:
               - .stack-work
 
+  run-example-test:
+    <<: *docker-linux
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - *run-example-test
+
 workflows:
   version: 2
 
@@ -83,3 +99,6 @@ workflows:
       - build:
           requires:
             - prebuild
+      - run-example-test:
+          requires:
+            - build
