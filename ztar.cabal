@@ -5,8 +5,8 @@ license-file:        LICENSE.md
 author:              Brandon Chinn <brandonchinn178@gmail.com>
 maintainer:          Brandon Chinn <brandonchinn178@gmail.com>
 category:            Codec
-synopsis:            Creating and extracting compressed tar archives
-description:         Creating and extracting compressed tar archives.
+synopsis:            Creating and extracting arbitrary archives
+description:         Creating and extracting arbitrary archives.
 build-type:          Simple
 cabal-version:       1.18
 extra-doc-files:     CHANGELOG.md, README.md

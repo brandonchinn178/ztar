@@ -1,8 +1,10 @@
 # ztar
 
-Reading and writing compressed `.tar` archives.
+Reading and writing arbitrary archives.
 
-An extension of the `tar` library that can create/extract compressed tar archives.
+An extension of the `tar` library that, similar to the `tar` UNIX executable,
+can create an archive with a given compression algorithm and automatically
+detect the compression algorithm of an archive when extracting.
 
 ```
 import Codec.Archive.Tar.Extra
