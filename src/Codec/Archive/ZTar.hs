@@ -13,17 +13,15 @@ Functions to create/extract archives.
 
 module Codec.Archive.ZTar
   ( Compression(..)
-  , pattern TarFormat
   , create
   , create'
   , extract
   ) where
 
-import qualified Codec.Archive.Tar as Tar
-import Data.ByteString.Lazy (ByteString)
 import qualified Data.ByteString.Lazy as BS
 
 import qualified Codec.Archive.ZTar.GZip as GZip
+import qualified Codec.Archive.ZTar.Tar as Tar
 import qualified Codec.Archive.ZTar.Zip as Zip
 
 -- | The compression algorithm to use when creating an archive.
@@ -57,19 +55,7 @@ extract :: FilePath -- ^ destination directory
         -> FilePath -- ^ archive to extract
         -> IO ()
 extract dir archive = BS.readFile archive >>= \case
-  Zip.ZipFormat -> Zip.extract dir archive
+  Tar.TarFormat -> Tar.extract dir archive
   GZip.GZipFormat -> GZip.extract dir archive
-  TarFormat -> Tar.extract dir archive
+  Zip.ZipFormat -> Zip.extract dir archive
   _ -> fail $ "Could not recognize archive format: " ++ archive
-
--- | A pattern matching any ByteString in an uncompressed TAR format.
-pattern TarFormat :: ByteString
-pattern TarFormat <- (matchesTar -> True)
-
-matchesTar :: ByteString -> Bool
-matchesTar (BS.drop 0x101 -> s) = any (`BS.isPrefixOf` s) tarMagicNumbers
-  where
-    tarMagicNumbers = map BS.pack
-      [ [0x75, 0x73, 0x74, 0x61, 0x72, 0x00, 0x30, 0x30]
-      , [0x75, 0x73, 0x74, 0x61, 0x72, 0x20, 0x20, 0x00]
-      ]
