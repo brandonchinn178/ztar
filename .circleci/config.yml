@@ -40,7 +40,7 @@ aliases:
   - &run-build
     run:
       name: Build package
-      command: stack build ztar --test --no-run-tests
+      command: stack build ztar --test --no-run-tests --flag ztar:dev
 
   # test steps
   - &run-example-test
