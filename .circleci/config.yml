@@ -102,3 +102,20 @@ workflows:
       - run-example-test:
           requires:
             - build
+
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 8 * * *"  # midnight PST
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - prebuild
+      - build:
+          requires:
+            - prebuild
+      - run-example-test:
+          requires:
+            - build
