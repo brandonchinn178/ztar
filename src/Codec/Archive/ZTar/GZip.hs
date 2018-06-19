@@ -21,6 +21,7 @@ import qualified Codec.Compression.GZip as GZ
 import Data.ByteString.Lazy (ByteString)
 import qualified Data.ByteString.Lazy as BS
 
+-- | A pattern matching any ByteString in the GZip format.
 pattern GZipFormat :: ByteString
 pattern GZipFormat <- ((BS.pack [0x1F, 0x8B] `BS.isPrefixOf`) -> True)
 

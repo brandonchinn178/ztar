@@ -31,6 +31,7 @@ import System.Directory
     )
 import System.FilePath ((</>))
 
+-- | A pattern matching any ByteString in the Zip format.
 pattern ZipFormat :: ByteString
 pattern ZipFormat <- ((BS.pack [0x50, 0x4B, 0x03, 0x04] `BS.isPrefixOf`) -> True)
 
