@@ -1,3 +1,8 @@
+# ztar 0.1.0
+
+Breaking changes:
+* Works against zip-0.2.0, will revert in 0.2.0
+
 # ztar 0.0.3
 
 Breaking changes:
