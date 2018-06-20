@@ -7,12 +7,12 @@ can create an archive with a given compression algorithm and automatically
 detect the compression algorithm of an archive when extracting.
 
 ```
-import Codec.Archive.Tar.Extra
+import Codec.Archive.ZTar
 
--- same as Codec.Archive.Tar.create
+-- equivalent to `Codec.Archive.Tar.create "archive.tar" "dist/" ["."]`
 create' NoCompression "archive.tar" "dist/" ["."]
 
--- helper to compress a single directory; equivalent to previous
+-- helper to compress a single directory; equivalent to previous line
 create NoCompression "archive.tar" "dist/"
 
 -- compress with GZip
