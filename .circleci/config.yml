@@ -49,6 +49,10 @@ aliases:
       command: |
         # call executable directly to avoid installing stack or any system dependencies
         eval "$(find .stack-work -type f -name example)"
+  - &run-integration-tests
+    run:
+      name: Run integration tests
+      command: stack test :ztar-test --flag ztar:dev
 
 jobs:
   prebuild:
@@ -90,6 +94,17 @@ jobs:
           at: .
       - *run-example-test
 
+  run-integration-tests:
+    <<: *docker-linux
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - *install-stack
+      - restore_cache:
+          key: *cache-key
+      - *run-integration-tests
+
 workflows:
   version: 2
 
@@ -100,6 +115,9 @@ workflows:
           requires:
             - prebuild
       - run-example-test:
+          requires:
+            - build
+      - run-integration-tests:
           requires:
             - build
 
@@ -117,5 +135,8 @@ workflows:
           requires:
             - prebuild
       - run-example-test:
+          requires:
+            - build
+      - run-integration-tests:
           requires:
             - build
