@@ -21,7 +21,6 @@ import qualified Codec.Archive.Zip as Zip
 import Control.Monad.IO.Class (liftIO)
 import Data.ByteString.Lazy (ByteString)
 import qualified Data.ByteString.Lazy as BS
-import Path (parseAbsDir, parseAbsFile, parseRelFile)
 import System.Directory
     ( createDirectoryIfMissing
     , doesDirectoryExist
@@ -57,7 +56,7 @@ create :: FilePath -- ^ archive to create
        -> [FilePath] -- ^ files and paths to compress, relative to base directory
        -> IO ()
 create archive base paths = do
-  archive' <- makeAbsolute archive >>= parseAbsFile
+  archive' <- makeAbsolute archive
   withCurrentDirectory base $ Zip.createArchive archive' $ mapM_ insert paths
   where
     insert path = do
@@ -68,9 +67,8 @@ create archive base paths = do
         | isDir -> insertDir path
         | otherwise -> fail $ "Path does not exist: " ++ path
     insertFile path = do
-      path' <- parseRelFile path
-      path'' <- Zip.mkEntrySelector path'
-      Zip.loadEntry Zip.BZip2 (const $ return path'') path'
+      path' <- Zip.mkEntrySelector path
+      Zip.loadEntry Zip.BZip2 path' path
     insertDir path =
       let mkPath = if path == "." then id else (path </>)
       in mapM_ (insert . mkPath) =<< liftIO (listDirectory path)
@@ -85,6 +83,4 @@ extract :: FilePath -- ^ archive to extract
         -> IO ()
 extract archive dir = do
   createDirectoryIfMissing True dir
-  archive' <- makeAbsolute archive >>= parseAbsFile
-  dir' <- makeAbsolute dir >>= parseAbsDir
-  Zip.withArchive archive' $ Zip.unpackInto dir'
+  Zip.withArchive archive $ Zip.unpackInto dir

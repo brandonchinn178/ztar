@@ -1,3 +1,8 @@
+# ztar 1.0.0
+
+Breaking changes:
+* Compiled against `zip-1.0.0`
+
 # ztar 0.2.0
 
 Breaking changes:
