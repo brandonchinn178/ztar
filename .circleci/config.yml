@@ -40,7 +40,7 @@ aliases:
   - &run-build
     run:
       name: Build package
-      command: stack build ztar --test --no-run-tests
+      command: stack build ztar --test --no-run-tests --flag ztar:dev
 
   # test steps
   - &run-example-test
@@ -49,6 +49,10 @@ aliases:
       command: |
         # call executable directly to avoid installing stack or any system dependencies
         eval "$(find .stack-work -type f -name example)"
+  - &run-integration-tests
+    run:
+      name: Run integration tests
+      command: stack test :ztar-test --flag ztar:dev
 
 jobs:
   prebuild:
@@ -90,6 +94,17 @@ jobs:
           at: .
       - *run-example-test
 
+  run-integration-tests:
+    <<: *docker-linux
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - *install-stack
+      - restore_cache:
+          key: *cache-key
+      - *run-integration-tests
+
 workflows:
   version: 2
 
@@ -100,5 +115,28 @@ workflows:
           requires:
             - prebuild
       - run-example-test:
+          requires:
+            - build
+      - run-integration-tests:
+          requires:
+            - build
+
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 8 * * *"  # midnight PST
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - prebuild
+      - build:
+          requires:
+            - prebuild
+      - run-example-test:
+          requires:
+            - build
+      - run-integration-tests:
           requires:
             - build

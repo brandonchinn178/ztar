@@ -1,16 +1,24 @@
 {-# LANGUAGE QuasiQuotes #-}
 
-import Codec.Archive.Tar.GZip (createGZ, extractGZ)
+import Codec.Archive.ZTar
 import Control.Monad (unless)
 import Path
 import Path.IO (ensureDir, removeDirRecur, removeFile, withSystemTempDir)
 
 main :: IO ()
-main = withSystemTempDir "" $ \dir -> do
-  mapM_ (mkFile dir) files
-  createGZ (fromRelFile archive) $ fromAbsDir dir
+main = mapM_ runTest
+  [ NoCompression
+  , GZip
+  , Zip
+  ]
 
-  extractGZ (fromRelDir extractDir) $ fromRelFile archive
+runTest :: Compression -> IO ()
+runTest compression = withSystemTempDir "" $ \dir -> do
+  putStrLn $ "\nTesting: " ++ show compression
+  mapM_ (mkFile dir) files
+  create compression (fromRelFile archive) $ fromAbsDir dir
+
+  extract (fromRelDir extractDir) $ fromRelFile archive
   contents <- mapM (readFile . fromRelFile . (extractDir </>)) files
   putStrLn $ unlines contents
   unless (contents == map show files) $
