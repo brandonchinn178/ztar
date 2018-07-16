@@ -1,7 +1,12 @@
+# ztar 0.1.1
+
+Changes:
+* Use the Unix `tar` command instead, because of issues with the Haskell `tar` library
+
 # ztar 0.1.0
 
 Breaking changes:
-* Works against zip-0.2.0, will revert in 0.2.0
+* Works against zip-0.2.0, will revert in future release
 
 # ztar 0.0.3
 
