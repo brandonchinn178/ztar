@@ -4,27 +4,21 @@ Maintainer  :  Brandon Chinn <brandonchinn178@gmail.com>
 Stability   :  experimental
 Portability :  portable
 
-The Haskell 'tar' library has a lot of bugs, including:
-  * Does not preserve executability (https://github.com/haskell/tar/issues/25)
-  * Does not preserve symbolic links (https://github.com/haskell/tar/issues/34)
-  * Does not allow symbolic links to `..` in a nested directory (https://github.com/haskell/tar/issues/32)
+The Haskell @tar@ library has a lot of bugs, including:
 
-Because of these bugs, we will be using the 'tar' Unix command, which should be commonly available
-on most systems. This module should be deprecated when the Haskell 'tar' library is updated.
+* Does not preserve executability (https://github.com/haskell/tar/issues/25)
+* Does not preserve symbolic links (https://github.com/haskell/tar/issues/34)
+* Does not allow symbolic links to `..` in a nested directory (https://github.com/haskell/tar/issues/32)
 
-Note that this module contains the same security considerations as the 'tar' Unix command. Follow
-the same security guidelines you would with the 'tar' Unix command when using this module.
+Because of these bugs, we will be using the @tar@ Unix command, which should be commonly available
+on most systems. This module should be deprecated when the Haskell @tar@ library is updated.
+
+Note that this module contains the same security considerations as the @tar@ Unix command. Follow
+the same security guidelines you would with the @tar@ Unix command when using this module.
 -}
 {-# LANGUAGE LambdaCase #-}
 
-module Codec.Archive.Tar
-  ( create
-  , extract
-  , unpack
-  , pack
-  , read
-  , write
-  ) where
+module Codec.Archive.Tar where
 
 import qualified Data.ByteString.Lazy as BS
 import qualified Data.Text.IO as Text
@@ -37,7 +31,7 @@ import System.Exit (ExitCode(..), exitWith)
 import System.PosixCompat.Temp (mkstemp)
 import System.Process (readProcessWithExitCode)
 
--- | Runs the UNIX 'tar' command.
+-- | Runs the UNIX @tar@ command with the given arguments.
 tar :: [String] -> IO ()
 tar args = readProcessWithExitCode "tar" args "" >>= \case
   (ExitSuccess, _, _) -> return ()
