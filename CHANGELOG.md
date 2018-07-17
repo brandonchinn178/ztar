@@ -1,3 +1,8 @@
+# ztar 0.1.3
+
+Changes:
+* Add the `typed-paths` flag for using the `Path` library
+
 # ztar 0.1.2
 
 Changes:
