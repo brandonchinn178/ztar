@@ -1,3 +1,8 @@
+# ztar 0.1.2
+
+Changes:
+* Fix for creating archives of non-UTF8 encoded files
+
 # ztar 0.1.1
 
 Changes:
