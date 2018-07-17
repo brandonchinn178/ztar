@@ -17,10 +17,11 @@ module Codec.Archive.ZTar.Tar
   , extract
   ) where
 
+import qualified Codec.Archive.Tar as Tar
 import Data.ByteString.Lazy (ByteString)
 import qualified Data.ByteString.Lazy as BS
 
-import qualified Codec.Archive.Tar as Tar
+import Codec.Archive.ZTar.Path
 
 -- | A pattern matching any ByteString in an uncompressed TAR format.
 pattern TarFormat :: ByteString
@@ -39,18 +40,18 @@ matchesTar (BS.drop 0x101 -> s) = any (`BS.isPrefixOf` s) tarMagicNumbers
 -- It is equivalent to calling the standard 'tar' program like so:
 --
 -- @$ tar -cf archive -C base paths@
-create :: FilePath -- ^ archive to create
-       -> FilePath -- ^ base directory
+create :: PathFile b0 -- ^ archive to create
+       -> PathDir b1 -- ^ base directory
        -> [FilePath] -- ^ files and paths to compress, relative to base directory
        -> IO ()
-create = Tar.create
+create (toFP -> archive) (toFP -> base) paths = Tar.create archive base paths
 
 -- | Extract all the files contained in an uncompressed tar archive.
 --
 -- It is equivalent to calling the standard 'tar' program like so:
 --
 -- @$ tar -xf archive -C dir@
-extract :: FilePath -- ^ destination directory
-        -> FilePath -- ^ archive to extract
+extract :: PathDir b0 -- ^ destination directory
+        -> PathFile b1 -- ^ archive to extract
         -> IO ()
-extract = Tar.extract
+extract (toFP -> dir) (toFP -> archive) = Tar.extract dir archive
