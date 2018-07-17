@@ -3,6 +3,8 @@
 import Codec.Archive.ZTar
 import Control.Monad (forM, forM_)
 import Control.Monad.Extra (unlessM)
+import qualified Data.ByteString as BS
+import Data.ByteString.Arbitrary (ArbByteString(..))
 import Data.List (dropWhileEnd, intercalate, nub)
 import Data.Maybe (fromJust)
 import Path
@@ -19,8 +21,8 @@ import Path
     , (</>)
     )
 import Path.IO (doesFileExist, ensureDir, isLocationOccupied, withTempDir)
-import Test.QuickCheck (Arbitrary(..), Gen, Property, elements, listOf, listOf1, suchThat)
-import Test.QuickCheck.Monadic (monadicIO, pick, run)
+import Test.QuickCheck
+import Test.QuickCheck.Monadic
 import Test.Tasty (defaultMain, testGroup)
 import Test.Tasty.QuickCheck (testProperty)
 
@@ -35,19 +37,22 @@ testZTar :: Compression -> Property
 testZTar compression = monadicIO $ do
   archive:src:dest:paths <- pick $ uniqueListOf 4 arbitrary
 
+  files <- forM paths $ \path -> do
+    Blind (ABS contents) <- pick arbitrary
+    return (toRelFile path, contents)
+
   run $ withTempDir [absdir|/tmp|] "" $ \dir -> do
-    let paths' = map toRelFile paths
-        archive' = dir </> toRelFile archive
+    let archive' = dir </> toRelFile archive
         src' = dir </> toRelDir src
         dest' = dir </> toRelDir dest
 
     -- write files to be bundled
-    forM_ paths' $ \path -> do
+    forM_ files $ \(path, contents) -> do
       let path' = src' </> path
       -- case writing `a` when `a/b` already exists
       unlessM (isLocationOccupied path') $ do
         ensureDir $ parent path'
-        writeFile (fromAbsFile path') (show path)
+        BS.writeFile (fromAbsFile path') contents
 
     -- create and extract archive
     ensureDir $ parent archive'
@@ -55,15 +60,15 @@ testZTar compression = monadicIO $ do
     extract (fromAbsDir dest') (fromAbsFile archive')
 
     -- check files
-    fmap and $ forM paths' $ \path -> do
+    fmap and $ forM files $ \(path, contents) -> do
       let path' = dest' </> path
       isExist <- isLocationOccupied path'
       isFile <- doesFileExist path'
       case (isExist, isFile) of
         (False, _) -> return False
         (True, True) -> do
-          contents <- readFile $ fromAbsFile path'
-          return $ contents == show path
+          contents' <- BS.readFile $ fromAbsFile path'
+          return $ contents' == contents
         (True, False) -> return True
 
 {- Helpers -}
@@ -99,7 +104,12 @@ instance Arbitrary ValidName where
   arbitrary = do
     -- https://stackoverflow.com/a/2306003/8565175
     name <- take 14 <$> listOf1 (elements validChars)
-    if last name == '.' || name `elem` ["nul"]
+    if or
+      [ last name == '.'
+      , name `elem` ["nul"]
+      -- https://superuser.com/questions/259703/get-mac-tar-to-stop-putting-filenames-in-tar-archives
+      , name !! 0 == '.' && name !! 1 == '_'
+      ]
       then arbitrary
       else return $ ValidName name
     where
