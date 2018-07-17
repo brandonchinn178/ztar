@@ -99,7 +99,12 @@ instance Arbitrary ValidName where
   arbitrary = do
     -- https://stackoverflow.com/a/2306003/8565175
     name <- take 14 <$> listOf1 (elements validChars)
-    if last name == '.' || name `elem` ["nul"]
+    if or
+      [ last name == '.'
+      , name `elem` ["nul"]
+      -- https://superuser.com/questions/259703/get-mac-tar-to-stop-putting-filenames-in-tar-archives
+      , name !! 0 == '.' && name !! 1 == '_'
+      ]
       then arbitrary
       else return $ ValidName name
     where
