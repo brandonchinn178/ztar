@@ -13,7 +13,6 @@ import Path
     , Rel
     , Path
     , absdir
-    , fromAbsDir
     , fromAbsFile
     , parent
     , parseRelDir
@@ -25,6 +24,8 @@ import Test.QuickCheck
 import Test.QuickCheck.Monadic
 import Test.Tasty (defaultMain, testGroup)
 import Test.Tasty.QuickCheck (testProperty)
+
+import Utilities
 
 main :: IO ()
 main = defaultMain $ testGroup "ztar"
@@ -56,8 +57,8 @@ testZTar compression = monadicIO $ do
 
     -- create and extract archive
     ensureDir $ parent archive'
-    create compression (fromAbsFile archive') (fromAbsDir src')
-    extract (fromAbsDir dest') (fromAbsFile archive')
+    create compression (fromPath archive') (fromPath src')
+    extract (fromPath dest') (fromPath archive')
 
     -- check files
     fmap and $ forM files $ \(path, contents) -> do

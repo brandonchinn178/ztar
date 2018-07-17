@@ -5,6 +5,8 @@ import Control.Monad (unless)
 import Path
 import Path.IO (ensureDir, removeDirRecur, removeFile, withSystemTempDir)
 
+import Utilities
+
 main :: IO ()
 main = mapM_ runTest
   [ NoCompression
@@ -16,9 +18,9 @@ runTest :: Compression -> IO ()
 runTest compression = withSystemTempDir "" $ \dir -> do
   putStrLn $ "\nTesting: " ++ show compression
   mapM_ (mkFile dir) files
-  create compression (fromRelFile archive) $ fromAbsDir dir
+  create compression (fromPath archive) (fromPath dir)
 
-  extract (fromRelDir extractDir) $ fromRelFile archive
+  extract (fromPath extractDir) (fromPath archive)
   contents <- mapM (readFile . fromRelFile . (extractDir </>)) files
   putStrLn $ unlines contents
   unless (contents == map show files) $
