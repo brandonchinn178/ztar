@@ -48,6 +48,7 @@ aliases:
       name: Run example test
       command: |
         # call executable directly to avoid installing stack or any system dependencies
+        # tests that ztar doesn't introduce any system dependencies
         eval "$(find .stack-work -type f -name example)"
   - &run-integration-tests
     run:
