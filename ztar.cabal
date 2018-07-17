@@ -37,6 +37,7 @@ library
                     , zip >= 0.2 && < 0.3
                     , zlib >= 0.6 && < 0.7
                     -- For Codec.Archive.Tar
+                    , deepseq
                     , process
                     , text
                     , unix-compat
@@ -75,6 +76,8 @@ test-suite ztar-test
   hs-source-dirs:     test
   main-is:            Test.hs
   build-depends:      base
+                    , bytestring
+                    , bytestring-arbitrary
                     , extra
                     , path
                     , path-io

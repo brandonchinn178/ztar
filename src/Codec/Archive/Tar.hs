@@ -20,10 +20,9 @@ the same security guidelines you would with the @tar@ Unix command when using th
 
 module Codec.Archive.Tar where
 
+import Control.DeepSeq (force)
+import Control.Exception (evaluate)
 import qualified Data.ByteString.Lazy as BS
-import qualified Data.Text.IO as Text
-import qualified Data.Text.Lazy as TextL
-import qualified Data.Text.Lazy.Encoding as TextL
 import GHC.IO.Handle (hClose)
 import Prelude hiding (read)
 import System.Directory (createDirectoryIfMissing, removeFile)
@@ -56,7 +55,7 @@ pack base paths = do
   (archive, h) <- mkstemp "tar-pack"
   hClose h
   tar $ ["-cf", archive, "-C", base] ++ paths
-  contents <- TextL.encodeUtf8 . TextL.fromStrict <$> Text.readFile archive
+  contents <- evaluate . force =<< BS.readFile archive
   removeFile archive
   return $ TarArchive contents
 

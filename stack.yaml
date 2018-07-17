@@ -2,3 +2,6 @@ resolver: lts-10.10
 
 packages:
 - .
+
+extra-deps:
+- bytestring-arbitrary-0.1.1
