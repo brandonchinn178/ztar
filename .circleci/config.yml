@@ -1,11 +1,24 @@
 version: 2
 
 aliases:
+  # CircleCI
+  - &nightly-only
+    triggers:
+      - schedule:
+          cron: "0 8 * * *"  # midnight PST
+          filters:
+            branches:
+              only:
+                - master
+
   # build environment
   - &docker-linux
     docker:
       - image: centos:7
     working_directory: /root/src
+  - &with-typed-paths
+    environment:
+      TYPED_PATHS: true
 
   # system dependencies
   - &install-system-deps
@@ -40,7 +53,16 @@ aliases:
   - &run-build
     run:
       name: Build package
-      command: stack build ztar --test --no-run-tests --flag ztar:dev
+      command: |
+        STACK_FLAGS=(
+          --test --no-run-tests
+          --flag ztar:dev
+        )
+        if [[ -n "$TYPED_PATHS" ]]; then
+          STACK_FLAGS+=(--flag ztar:typed-paths)
+        fi
+        echo "STACK_FLAGS: ${STACK_FLAGS[*]}"
+        stack build ztar "${STACK_FLAGS[@]}"
 
   # test steps
   - &run-example-test
@@ -48,11 +70,53 @@ aliases:
       name: Run example test
       command: |
         # call executable directly to avoid installing stack or any system dependencies
+        # tests that ztar doesn't introduce any system dependencies
         eval "$(find .stack-work -type f -name example)"
   - &run-integration-tests
     run:
       name: Run integration tests
-      command: stack test :ztar-test --flag ztar:dev
+      command: |
+        STACK_FLAGS=(
+          --flag ztar:dev
+        )
+        if [[ -n "$TYPED_PATHS" ]]; then
+          STACK_FLAGS+=(--flag ztar:typed-paths)
+        fi
+        echo "STACK_FLAGS: ${STACK_FLAGS[*]}"
+        stack test :ztar-test "${STACK_FLAGS[@]}"
+
+  # job steps
+  - &build-steps
+    - checkout
+    - attach_workspace:
+        at: .
+    - *install-system-deps
+    - *install-stack
+    - restore_cache:
+        key: *cache-key
+    - *install-stack-deps
+    - save_cache:
+        key: *cache-key
+        paths:
+          - ~/.stack
+    - *run-build
+    - persist_to_workspace:
+        root: .
+        paths:
+            - .stack-work
+  - &example-test-steps
+    - checkout
+    - attach_workspace:
+        at: .
+    - *run-example-test
+  - &integration-test-steps
+    - checkout
+    - attach_workspace:
+        at: .
+    - *install-stack
+    - restore_cache:
+        key: *cache-key
+    - *run-integration-tests
 
 jobs:
   prebuild:
@@ -67,43 +131,27 @@ jobs:
 
   build:
     <<: *docker-linux
-    steps:
-      - checkout
-      - attach_workspace:
-          at: .
-      - *install-system-deps
-      - *install-stack
-      - restore_cache:
-          key: *cache-key
-      - *install-stack-deps
-      - save_cache:
-          key: *cache-key
-          paths:
-            - ~/.stack
-      - *run-build
-      - persist_to_workspace:
-          root: .
-          paths:
-              - .stack-work
+    steps: *build-steps
+
+  build-typed-paths:
+    <<: [*docker-linux, *with-typed-paths]
+    steps: *build-steps
 
   run-example-test:
     <<: *docker-linux
-    steps:
-      - checkout
-      - attach_workspace:
-          at: .
-      - *run-example-test
+    steps: *example-test-steps
+
+  run-example-test-typed-paths:
+    <<: [*docker-linux, *with-typed-paths]
+    steps: *example-test-steps
 
   run-integration-tests:
     <<: *docker-linux
-    steps:
-      - checkout
-      - attach_workspace:
-          at: .
-      - *install-stack
-      - restore_cache:
-          key: *cache-key
-      - *run-integration-tests
+    steps: *integration-test-steps
+
+  run-integration-tests-typed-paths:
+    <<: [*docker-linux, *with-typed-paths]
+    steps: *integration-test-steps
 
 workflows:
   version: 2
@@ -121,14 +169,21 @@ workflows:
           requires:
             - build
 
+  build_and_test_typed_paths:
+    jobs:
+      - prebuild
+      - build-typed-paths:
+          requires:
+            - prebuild
+      - run-example-test-typed-paths:
+          requires:
+            - build-typed-paths
+      - run-integration-tests-typed-paths:
+          requires:
+            - build-typed-paths
+
   nightly:
-    triggers:
-      - schedule:
-          cron: "0 8 * * *"  # midnight PST
-          filters:
-            branches:
-              only:
-                - master
+    <<: *nightly-only
     jobs:
       - prebuild
       - build:
@@ -140,3 +195,17 @@ workflows:
       - run-integration-tests:
           requires:
             - build
+
+  nightly_typed_paths:
+    <<: *nightly-only
+    jobs:
+      - prebuild
+      - build-typed-paths:
+          requires:
+            - prebuild
+      - run-example-test-typed-paths:
+          requires:
+            - build-typed-paths
+      - run-integration-tests-typed-paths:
+          requires:
+            - build-typed-paths

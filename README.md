@@ -26,3 +26,24 @@ extract "archive-tar/" "archive.tar"
 extract "archive-gz/" "archive.tar.gz"
 extract "archive-zip/" "archive.zip"
 ```
+
+## Using the Path library
+
+If your code uses the [`Path`](https://hackage.haskell.org/package/path) library for more
+type-safe filepaths, include the `typed-paths` flag.
+
+```
+# stack.yaml
+flags:
+  ztar:
+    typed-paths: true
+
+# Main.hs
+import Path
+import Path.IO
+
+home <- getHomeDir
+let archive = home </> [relfile|archive.tgz|]
+dir <- resolveDir "dist/"
+create GZip archive dir
+```

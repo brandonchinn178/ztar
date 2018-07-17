@@ -20,11 +20,17 @@ flag dev
   manual:             True
   default:            False
 
+flag typed-paths
+  description:        Use the Path library
+  manual:             True
+  default:            False
+
 library
   hs-source-dirs:     src
   default-language:   Haskell2010
   exposed-modules:    Codec.Archive.ZTar
                       Codec.Archive.ZTar.GZip
+                      Codec.Archive.ZTar.Path
                       Codec.Archive.ZTar.Tar
                       Codec.Archive.ZTar.Zip
                       Codec.Archive.Tar
@@ -41,6 +47,10 @@ library
                     , process
                     , text
                     , unix-compat
+  if flag(typed-paths)
+    build-depends:    path >= 0.5 && < 0.7
+    cpp-options:      -DTYPED_PATHS
+
   ghc-options: -Wall
   if flag(dev)
     ghc-options:      -Werror
@@ -56,10 +66,13 @@ test-suite example
   default-language:   Haskell2010
   hs-source-dirs:     test
   main-is:            Example.hs
+  other-modules:      Utilities
   build-depends:      base
                     , path
                     , path-io
                     , ztar
+  if flag(typed-paths)
+    cpp-options:      -DTYPED_PATHS
   ghc-options: -Wall
   if flag(dev)
     ghc-options:      -Werror
@@ -75,6 +88,7 @@ test-suite ztar-test
   default-language:   Haskell2010
   hs-source-dirs:     test
   main-is:            Test.hs
+  other-modules:      Utilities
   build-depends:      base
                     , bytestring
                     , bytestring-arbitrary
@@ -85,6 +99,8 @@ test-suite ztar-test
                     , tasty
                     , tasty-quickcheck
                     , ztar
+  if flag(typed-paths)
+    cpp-options:      -DTYPED_PATHS
   ghc-options: -Wall
   if flag(dev)
     ghc-options:      -Werror

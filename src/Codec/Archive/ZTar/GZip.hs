@@ -21,6 +21,8 @@ import qualified Codec.Compression.GZip as GZ
 import Data.ByteString.Lazy (ByteString)
 import qualified Data.ByteString.Lazy as BS
 
+import Codec.Archive.ZTar.Path
+
 -- | A pattern matching any ByteString in the GZip format.
 pattern GZipFormat :: ByteString
 pattern GZipFormat <- ((BS.pack [0x1F, 0x8B] `BS.isPrefixOf`) -> True)
@@ -30,18 +32,20 @@ pattern GZipFormat <- ((BS.pack [0x1F, 0x8B] `BS.isPrefixOf`) -> True)
 -- It is equivalent to calling the standard 'tar' program like so:
 --
 -- @$ tar -czf archive -C base paths@
-create :: FilePath -- ^ archive to create
-       -> FilePath -- ^ base directory
+create :: PathFile b0 -- ^ archive to create
+       -> PathDir b1 -- ^ base directory
        -> [FilePath] -- ^ files and paths to compress, relative to base directory
        -> IO ()
-create archive base paths = BS.writeFile archive . GZ.compress . Tar.write =<< Tar.pack base paths
+create (toFP -> archive) (toFP -> base) paths =
+  BS.writeFile archive . GZ.compress . Tar.write =<< Tar.pack base paths
 
 -- | Extract all the files contained in an archive compressed with GZip.
 --
 -- It is equivalent to calling the standard 'tar' program like so:
 --
 -- @$ tar -xf archive -C dir@
-extract :: FilePath -- ^ destination directory
-        -> FilePath -- ^ archive to extract
+extract :: PathDir b0 -- ^ destination directory
+        -> PathFile b1 -- ^ archive to extract
         -> IO ()
-extract dir archive = Tar.unpack dir . Tar.read . GZ.decompress =<< BS.readFile archive
+extract (toFP -> dir) (toFP -> archive) =
+  Tar.unpack dir . Tar.read . GZ.decompress =<< BS.readFile archive
