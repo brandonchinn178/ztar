@@ -13,6 +13,7 @@ import Path
     , Rel
     , Path
     , absdir
+    , reldir
     , fromAbsFile
     , parent
     , parseRelDir
@@ -41,9 +42,9 @@ testZTar compression = monadicIO $ do
     return (toRelFile path, contents)
 
   run $ withTempDir [absdir|/tmp|] "" $ \dir -> do
-    let archive' = dir </> toRelFile archive
-        src' = dir </> toRelDir src
-        dest' = dir </> toRelDir dest
+    let archive' = dir </> [reldir|archive|] </> toRelFile archive
+        src' = dir </> [reldir|src|] </> toRelDir src
+        dest' = dir </> [reldir|dest|] </> toRelDir dest
 
     -- write files to be bundled
     forM_ files $ \(path, contents) -> do
