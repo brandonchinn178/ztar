@@ -10,7 +10,7 @@ detect the compression algorithm of an archive when extracting.
 import Codec.Archive.ZTar
 
 -- equivalent to `Codec.Archive.Tar.create "archive.tar" "dist/" ["."]`
-create' NoCompression "archive.tar" "dist/" ["."]
+createFrom NoCompression "archive.tar" "dist/" ["."]
 
 -- helper to compress a single directory; equivalent to previous line
 create NoCompression "archive.tar" "dist/"

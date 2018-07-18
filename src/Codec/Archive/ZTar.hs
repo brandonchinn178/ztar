@@ -14,7 +14,7 @@ Functions to create/extract archives.
 module Codec.Archive.ZTar
   ( Compression(..)
   , create
-  , create'
+  , createFrom
   , extract
   ) where
 
@@ -36,15 +36,15 @@ create :: Compression
        -> FilePath -- ^ archive file to create
        -> FilePath -- ^ directory to archive
        -> IO ()
-create compression archive dir = create' compression archive dir ["."]
+create compression archive dir = createFrom compression archive dir ["."]
 
 -- | Create a new archive from the given paths using the given compression algorithm.
-create' :: Compression
-        -> FilePath -- ^ archive file to create
-        -> FilePath -- ^ base directory
-        -> [FilePath] -- ^ files and paths to compress, relative to base directory
-        -> IO ()
-create' compression = case compression of
+createFrom :: Compression
+           -> FilePath -- ^ archive file to create
+           -> FilePath -- ^ base directory
+           -> [FilePath] -- ^ files and paths to compress, relative to base directory
+           -> IO ()
+createFrom compression = case compression of
   NoCompression -> Tar.create
   GZip -> GZip.create
   Zip -> Zip.create
