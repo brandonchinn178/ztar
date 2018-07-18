@@ -62,7 +62,7 @@ createFrom' :: Compression -> Path b0 File -> Path b1 Dir -> [FilePath] -> IO ()
 createFrom' compression (toFilePath -> archive) (toFilePath -> dir) paths =
   createFrom compression archive dir paths
 
--- | Extract an archive to the given directory. Automatically detects the compression algorithm.
+-- | Extract an archive to the given directory. Automatically detects the compression algorithm
 -- used in the archive.
 extract :: FilePath -- ^ archive to extract
         -> FilePath -- ^ destination directory
