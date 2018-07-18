@@ -32,8 +32,6 @@ import System.Directory
     )
 import System.FilePath ((</>))
 
-import Codec.Archive.ZTar.Path
-
 -- | A pattern matching any ByteString in the Zip format.
 pattern ZipFormat :: ByteString
 pattern ZipFormat <- ((BS.pack [0x50, 0x4B, 0x03, 0x04] `BS.isPrefixOf`) -> True)
@@ -43,11 +41,11 @@ pattern ZipFormat <- ((BS.pack [0x50, 0x4B, 0x03, 0x04] `BS.isPrefixOf`) -> True
 -- It is equivalent to calling the standard 'zip' program like so:
 --
 -- @$ CURR=$PWD; (cd base && zip -r archive paths && mv archive $CURR)@
-create :: PathFile b0 -- ^ archive to create
-       -> PathDir b1 -- ^ base directory
+create :: FilePath -- ^ archive to create
+       -> FilePath -- ^ base directory
        -> [FilePath] -- ^ files and paths to compress, relative to base directory
        -> IO ()
-create (toFP -> archive) (toFP -> base) paths = do
+create archive base paths = do
   archive' <- makeAbsolute archive >>= parseAbsFile
   withCurrentDirectory base $ Zip.createArchive archive' $ mapM_ insert paths
   where
@@ -71,10 +69,10 @@ create (toFP -> archive) (toFP -> base) paths = do
 -- It is equivalent to calling the standard 'zip' program like so:
 --
 -- @$ mkdir -p dir && unzip archive -d dir@
-extract :: PathDir b0 -- ^ destination directory
-        -> PathFile b1 -- ^ archive to extract
+extract :: FilePath -- ^ destination directory
+        -> FilePath -- ^ archive to extract
         -> IO ()
-extract (toFP -> dir) (toFP -> archive) = do
+extract dir archive = do
   createDirectoryIfMissing True dir
   archive' <- makeAbsolute archive >>= parseAbsFile
   dir' <- makeAbsolute dir >>= parseAbsDir
