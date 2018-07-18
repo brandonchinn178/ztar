@@ -25,4 +25,12 @@ create Zip "archive.zip" "dist/"
 extract "archive-tar/" "archive.tar"
 extract "archive-gz/" "archive.tar.gz"
 extract "archive-zip/" "archive.zip"
+
+-- can also use Path types
+import Path
+import Path.IO
+home <- getHomeDir
+let archive = home </> [relfile|archive.tgz|]
+dir <- resolveDir "dist/"
+create' GZip archive dir
 ```
