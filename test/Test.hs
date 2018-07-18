@@ -25,8 +25,6 @@ import Test.QuickCheck.Monadic
 import Test.Tasty (defaultMain, testGroup)
 import Test.Tasty.QuickCheck (testProperty)
 
-import Utilities
-
 main :: IO ()
 main = defaultMain $ testGroup "ztar"
   [ testProperty "Create/extract uncompressed tar archives" $ testZTar NoCompression
@@ -57,8 +55,8 @@ testZTar compression = monadicIO $ do
 
     -- create and extract archive
     ensureDir $ parent archive'
-    create compression (fromPath archive') (fromPath src')
-    extract (fromPath dest') (fromPath archive')
+    create' compression archive' src'
+    extract' archive' dest'
 
     -- check files
     fmap and $ forM files $ \(path, contents) -> do

@@ -1,3 +1,12 @@
+# ztar 0.2.0
+
+Breaking changes:
+* `create'` is now `createFrom`
+
+Changes:
+* Removed the `typed-paths` flag
+* Added `create'`, `createFrom'`, and `extract'` which use Path types
+
 # ztar 0.1.3
 
 Changes:

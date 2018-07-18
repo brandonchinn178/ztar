@@ -21,8 +21,6 @@ import qualified Codec.Archive.Tar as Tar
 import Data.ByteString.Lazy (ByteString)
 import qualified Data.ByteString.Lazy as BS
 
-import Codec.Archive.ZTar.Path
-
 -- | A pattern matching any ByteString in an uncompressed TAR format.
 pattern TarFormat :: ByteString
 pattern TarFormat <- (matchesTar -> True)
@@ -40,18 +38,18 @@ matchesTar (BS.drop 0x101 -> s) = any (`BS.isPrefixOf` s) tarMagicNumbers
 -- It is equivalent to calling the standard 'tar' program like so:
 --
 -- @$ tar -cf archive -C base paths@
-create :: PathFile b0 -- ^ archive to create
-       -> PathDir b1 -- ^ base directory
+create :: FilePath -- ^ archive to create
+       -> FilePath -- ^ base directory
        -> [FilePath] -- ^ files and paths to compress, relative to base directory
        -> IO ()
-create (toFP -> archive) (toFP -> base) paths = Tar.create archive base paths
+create = Tar.create
 
 -- | Extract all the files contained in an uncompressed tar archive.
 --
 -- It is equivalent to calling the standard 'tar' program like so:
 --
 -- @$ tar -xf archive -C dir@
-extract :: PathDir b0 -- ^ destination directory
-        -> PathFile b1 -- ^ archive to extract
+extract :: FilePath -- ^ archive to extract
+        -> FilePath -- ^ destination directory
         -> IO ()
-extract (toFP -> dir) (toFP -> archive) = Tar.extract dir archive
+extract = flip Tar.extract

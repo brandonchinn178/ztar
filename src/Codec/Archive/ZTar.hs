@@ -15,13 +15,16 @@ module Codec.Archive.ZTar
   ( Compression(..)
   , create
   , create'
+  , createFrom
+  , createFrom'
   , extract
+  , extract'
   ) where
 
 import qualified Data.ByteString.Lazy as BS
+import Path (Dir, File, Path, toFilePath)
 
 import qualified Codec.Archive.ZTar.GZip as GZip
-import Codec.Archive.ZTar.Path
 import qualified Codec.Archive.ZTar.Tar as Tar
 import qualified Codec.Archive.ZTar.Zip as Zip
 
@@ -34,29 +37,42 @@ data Compression
 
 -- | Create a new archive from the given directory using the given compression algorithm.
 create :: Compression
-       -> PathFile b0 -- ^ archive file to create
-       -> PathDir b1 -- ^ directory to archive
+       -> FilePath -- ^ archive file to create
+       -> FilePath -- ^ directory to archive
        -> IO ()
-create compression archive dir = create' compression archive dir ["."]
+create compression archive dir = createFrom compression archive dir ["."]
+
+-- | Same as 'create' but using Path types.
+create' :: Compression -> Path b0 File -> Path b1 Dir -> IO ()
+create' compression (toFilePath -> archive) (toFilePath -> dir) = create compression archive dir
 
 -- | Create a new archive from the given paths using the given compression algorithm.
-create' :: Compression
-        -> PathFile b0 -- ^ archive file to create
-        -> PathDir b1 -- ^ base directory
-        -> [FilePath] -- ^ files and paths to compress, relative to base directory
-        -> IO ()
-create' compression = case compression of
+createFrom :: Compression
+           -> FilePath -- ^ archive file to create
+           -> FilePath -- ^ base directory
+           -> [FilePath] -- ^ files and paths to compress, relative to base directory
+           -> IO ()
+createFrom compression = case compression of
   NoCompression -> Tar.create
   GZip -> GZip.create
   Zip -> Zip.create
 
+-- | Same as 'createFrom' but using Path types.
+createFrom' :: Compression -> Path b0 File -> Path b1 Dir -> [FilePath] -> IO ()
+createFrom' compression (toFilePath -> archive) (toFilePath -> dir) paths =
+  createFrom compression archive dir paths
+
 -- | Extract an archive to the given directory. Automatically detects the compression algorithm.
 -- used in the archive.
-extract :: PathDir b0 -- ^ destination directory
-        -> PathFile b1 -- ^ archive to extract
+extract :: FilePath -- ^ archive to extract
+        -> FilePath -- ^ destination directory
         -> IO ()
-extract dir archive = BS.readFile (toFP archive) >>= \case
-  Tar.TarFormat -> Tar.extract dir archive
-  GZip.GZipFormat -> GZip.extract dir archive
-  Zip.ZipFormat -> Zip.extract dir archive
-  _ -> fail $ "Could not recognize archive format: " ++ (toFP archive)
+extract archive dir = BS.readFile archive >>= \case
+  Tar.TarFormat -> Tar.extract archive dir
+  GZip.GZipFormat -> GZip.extract archive dir
+  Zip.ZipFormat -> Zip.extract archive dir
+  _ -> fail $ "Could not recognize archive format: " ++ archive
+
+-- | Same as 'extract' but using Path types.
+extract' :: Path b1 File -> Path b0 Dir -> IO ()
+extract' (toFilePath -> archive) (toFilePath -> dir) = extract archive dir
