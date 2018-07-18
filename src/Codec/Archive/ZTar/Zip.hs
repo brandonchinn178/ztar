@@ -34,7 +34,18 @@ import System.FilePath ((</>))
 
 -- | A pattern matching any ByteString in the Zip format.
 pattern ZipFormat :: ByteString
-pattern ZipFormat <- ((BS.pack [0x50, 0x4B, 0x03, 0x04] `BS.isPrefixOf`) -> True)
+pattern ZipFormat <- (matchesZip -> True)
+
+matchesZip :: ByteString -> Bool
+matchesZip s = any (`BS.isPrefixOf` s) zipMagicNumbers
+  where
+    zipMagicNumbers = map BS.pack
+     [ [0x50, 0x4B, 0x03, 0x04]
+     -- empty archive
+     , [0x50, 0x4B, 0x05, 0x06]
+     -- spanned archive
+     , [0x50, 0x4B, 0x07, 0x08]
+     ]
 
 -- | Create a new archive compressed with Zip from the given paths.
 --
