@@ -5,7 +5,7 @@ import Control.Monad (forM, forM_)
 import Control.Monad.Extra (unlessM)
 import qualified Data.ByteString as BS
 import Data.ByteString.Arbitrary (ArbByteString(..))
-import Data.List (dropWhileEnd, intercalate, nub)
+import Data.List (dropWhileEnd, intercalate, isPrefixOf, nub)
 import Data.Maybe (fromJust)
 import Path
     ( Dir
@@ -108,7 +108,7 @@ instance Arbitrary ValidName where
     if or
       [ last name == '.'
       -- https://superuser.com/questions/259703/get-mac-tar-to-stop-putting-filenames-in-tar-archives
-      , name !! 0 == '.' && name !! 1 == '_'
+      , "._" `isPrefixOf` name
       , not $ Windows.isValid name
       ]
       then arbitrary
