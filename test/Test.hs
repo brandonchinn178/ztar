@@ -21,6 +21,7 @@ import Path
     , (</>)
     )
 import Path.IO (doesFileExist, ensureDir, isLocationOccupied, withTempDir)
+import qualified System.FilePath.Windows as Windows
 import Test.QuickCheck
 import Test.QuickCheck.Monadic
 import Test.Tasty (defaultMain, testGroup)
@@ -106,9 +107,9 @@ instance Arbitrary ValidName where
     name <- take 14 <$> listOf1 (elements validChars)
     if or
       [ last name == '.'
-      , name `elem` ["nul"]
       -- https://superuser.com/questions/259703/get-mac-tar-to-stop-putting-filenames-in-tar-archives
       , name !! 0 == '.' && name !! 1 == '_'
+      , not $ Windows.isValid name
       ]
       then arbitrary
       else return $ ValidName name
