@@ -39,7 +39,7 @@ aliases:
       command: |
         FILES=(
           stack.yaml
-          ztar.cabal
+          package.yaml
         )
         cat "${FILES[@]}" > cache-key.txt
   - &cache-key
