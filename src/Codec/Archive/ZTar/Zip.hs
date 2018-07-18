@@ -69,10 +69,10 @@ create archive base paths = do
 -- It is equivalent to calling the standard 'zip' program like so:
 --
 -- @$ mkdir -p dir && unzip archive -d dir@
-extract :: FilePath -- ^ destination directory
-        -> FilePath -- ^ archive to extract
+extract :: FilePath -- ^ archive to extract
+        -> FilePath -- ^ destination directory
         -> IO ()
-extract dir archive = do
+extract archive dir = do
   createDirectoryIfMissing True dir
   archive' <- makeAbsolute archive >>= parseAbsFile
   dir' <- makeAbsolute dir >>= parseAbsDir

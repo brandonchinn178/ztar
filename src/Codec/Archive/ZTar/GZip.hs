@@ -42,8 +42,8 @@ create archive base paths =
 -- It is equivalent to calling the standard 'tar' program like so:
 --
 -- @$ tar -xf archive -C dir@
-extract :: FilePath -- ^ destination directory
-        -> FilePath -- ^ archive to extract
+extract :: FilePath -- ^ archive to extract
+        -> FilePath -- ^ destination directory
         -> IO ()
-extract dir archive =
+extract archive dir =
   Tar.unpack dir . Tar.read . GZ.decompress =<< BS.readFile archive

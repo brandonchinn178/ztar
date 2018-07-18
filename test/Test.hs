@@ -13,7 +13,6 @@ import Path
     , Rel
     , Path
     , absdir
-    , fromAbsDir
     , fromAbsFile
     , parent
     , parseRelDir
@@ -56,8 +55,8 @@ testZTar compression = monadicIO $ do
 
     -- create and extract archive
     ensureDir $ parent archive'
-    create compression (fromAbsFile archive') (fromAbsDir src')
-    extract (fromAbsDir dest') (fromAbsFile archive')
+    create' compression archive' src'
+    extract' archive' dest'
 
     -- check files
     fmap and $ forM files $ \(path, contents) -> do

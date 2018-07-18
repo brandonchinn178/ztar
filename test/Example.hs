@@ -16,9 +16,9 @@ runTest :: Compression -> IO ()
 runTest compression = withSystemTempDir "" $ \dir -> do
   putStrLn $ "\nTesting: " ++ show compression
   mapM_ (mkFile dir) files
-  create compression (fromRelFile archive) (fromAbsDir dir)
+  create' compression archive dir
 
-  extract (fromRelDir extractDir) (fromRelFile archive)
+  extract' archive extractDir
   contents <- mapM (readFile . fromRelFile . (extractDir </>)) files
   putStrLn $ unlines contents
   unless (contents == map show files) $

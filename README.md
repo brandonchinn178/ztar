@@ -22,9 +22,9 @@ create GZip "archive.tar.gz" "dist/"
 create Zip "archive.zip" "dist/"
 
 -- automatically determines compression
-extract "archive-tar/" "archive.tar"
-extract "archive-gz/" "archive.tar.gz"
-extract "archive-zip/" "archive.zip"
+extract "archive.tar" "archive-tar/"
+extract "archive.tar.gz" "archive-gz/"
+extract "archive.zip" "archive-zip/"
 
 -- can also use Path types
 import Path

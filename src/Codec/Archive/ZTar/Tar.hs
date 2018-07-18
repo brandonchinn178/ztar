@@ -42,14 +42,14 @@ create :: FilePath -- ^ archive to create
        -> FilePath -- ^ base directory
        -> [FilePath] -- ^ files and paths to compress, relative to base directory
        -> IO ()
-create archive base paths = Tar.create archive base paths
+create = Tar.create
 
 -- | Extract all the files contained in an uncompressed tar archive.
 --
 -- It is equivalent to calling the standard 'tar' program like so:
 --
 -- @$ tar -xf archive -C dir@
-extract :: FilePath -- ^ destination directory
-        -> FilePath -- ^ archive to extract
+extract :: FilePath -- ^ archive to extract
+        -> FilePath -- ^ destination directory
         -> IO ()
-extract dir archive = Tar.extract dir archive
+extract = flip Tar.extract

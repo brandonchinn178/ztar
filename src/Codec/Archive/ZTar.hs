@@ -64,15 +64,15 @@ createFrom' compression (toFilePath -> archive) (toFilePath -> dir) paths =
 
 -- | Extract an archive to the given directory. Automatically detects the compression algorithm.
 -- used in the archive.
-extract :: FilePath -- ^ destination directory
-        -> FilePath -- ^ archive to extract
+extract :: FilePath -- ^ archive to extract
+        -> FilePath -- ^ destination directory
         -> IO ()
-extract dir archive = BS.readFile archive >>= \case
-  Tar.TarFormat -> Tar.extract dir archive
-  GZip.GZipFormat -> GZip.extract dir archive
-  Zip.ZipFormat -> Zip.extract dir archive
+extract archive dir = BS.readFile archive >>= \case
+  Tar.TarFormat -> Tar.extract archive dir
+  GZip.GZipFormat -> GZip.extract archive dir
+  Zip.ZipFormat -> Zip.extract archive dir
   _ -> fail $ "Could not recognize archive format: " ++ archive
 
 -- | Same as 'extract' but using Path types.
-extract' :: Path b0 Dir -> Path b1 File -> IO ()
-extract' (toFilePath -> dir) (toFilePath -> archive) = extract dir archive
+extract' :: Path b1 File -> Path b0 Dir -> IO ()
+extract' (toFilePath -> archive) (toFilePath -> dir) = extract archive dir
