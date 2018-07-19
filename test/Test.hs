@@ -2,10 +2,9 @@
 
 import Codec.Archive.ZTar
 import Control.Monad (forM, forM_)
-import Control.Monad.Extra (unlessM)
 import qualified Data.ByteString as BS
 import Data.ByteString.Arbitrary (ArbByteString(..))
-import Data.List (dropWhileEnd, intercalate, isPrefixOf, nub)
+import Data.List (isPrefixOf, nub)
 import Data.Maybe (fromJust)
 import Path
     ( Dir
@@ -13,8 +12,8 @@ import Path
     , Rel
     , Path
     , absdir
-    , reldir
     , fromAbsFile
+    , fromRelDir
     , parent
     , parseRelDir
     , parseRelFile
@@ -36,27 +35,25 @@ main = defaultMain $ testGroup "ztar"
 
 testZTar :: Compression -> Property
 testZTar compression = monadicIO $ do
-  archive:src:dest:paths <- pick $ uniqueListOf 4 arbitrary
-
-  files <- forM paths $ \path -> do
-    Blind (ABS contents) <- pick arbitrary
-    return (toRelFile path, contents)
+  [archive, src, dest] <- pick $ uniqueListOf 3 arbitrary
+  files <- pick arbitraryFileTree
 
   run $ withTempDir [absdir|/tmp|] "" $ \dir -> do
-    let archive' = dir </> [reldir|archive|] </> toRelFile archive
-        src' = dir </> [reldir|src|] </> toRelDir src
-        dest' = dir </> [reldir|dest|] </> toRelDir dest
+    let archive' = dir </> toRelFile archive
+        src' = dir </> toRelDir src
+        dest' = dir </> toRelDir dest
+
+    ensureDir $ parent archive'
+    ensureDir src'
+    ensureDir dest'
 
     -- write files to be bundled
     forM_ files $ \(path, contents) -> do
       let path' = src' </> path
-      -- case writing `a` when `a/b` already exists
-      unlessM (isLocationOccupied path') $ do
-        ensureDir $ parent path'
-        BS.writeFile (fromAbsFile path') contents
+      ensureDir $ parent path'
+      BS.writeFile (fromAbsFile path') contents
 
     -- create and extract archive
-    ensureDir $ parent archive'
     create' compression archive' src'
     extract' archive' dest'
 
@@ -74,32 +71,44 @@ testZTar compression = monadicIO $ do
 
 {- Helpers -}
 
--- | Generate a unique list with length at least N.
+toRelFile :: ValidName -> Path Rel File
+toRelFile = fromJust . parseRelFile . unName
+
+toRelDir :: ValidName -> Path Rel Dir
+toRelDir = fromJust . parseRelDir . unName
+
+maybeSlash :: Maybe (Path Rel Dir) -> Path Rel t -> Path Rel t
+maybeSlash Nothing path = path
+maybeSlash (Just dir) path = dir </> path
+
+-- | Generate a unique list with length of N.
 uniqueListOf :: Eq a => Int -> Gen a -> Gen [a]
-uniqueListOf 0 gen = nub <$> listOf gen
+uniqueListOf 0 _ = return []
 uniqueListOf n gen = do
   rest <- uniqueListOf (n - 1) gen
   x <- gen `suchThat` (`notElem` rest)
   return $ x : rest
 
--- | A valid relative file path.
-newtype ValidPath = ValidPath { unPath :: FilePath }
-  deriving (Show,Eq)
-
-instance Arbitrary ValidPath where
-  arbitrary = ValidPath . truncatePath . intercalate "/" . map unName <$> listOf1 arbitrary
-    where
-      truncatePath = dropWhileEnd (`elem` ['/', '.']) . take 50
-
-toRelFile :: ValidPath -> Path Rel File
-toRelFile = fromJust . parseRelFile . unPath
-
-toRelDir :: ValidPath -> Path Rel Dir
-toRelDir = fromJust . parseRelDir . unPath
+-- | An arbitrary file tree and their contents.
+arbitraryFileTree :: Gen [(Path Rel File, BS.ByteString)]
+arbitraryFileTree = mkFileTree Nothing (0 :: Int)
+  where
+    mkFileTree (Just dir) _
+      | length (fromRelDir dir) > 50 = return []
+    mkFileTree _ 5 = return [] -- max depth of 5 directories
+    mkFileTree dir depth = do
+      paths <- nub <$> listOf arbitrary
+      fmap concat $ forM paths $ \path -> do
+        isFile <- arbitrary
+        if isFile
+          then do
+            Blind (ABS contents) <- arbitrary
+            return [(dir `maybeSlash` toRelFile path, contents)]
+          else mkFileTree (Just $ dir `maybeSlash` toRelDir path) (depth + 1)
 
 -- | A valid file or directory name.
 newtype ValidName = ValidName { unName :: String }
-  deriving (Show)
+  deriving (Show,Eq)
 
 instance Arbitrary ValidName where
   arbitrary = do
