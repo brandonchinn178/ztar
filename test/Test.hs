@@ -9,8 +9,8 @@ import Data.Maybe (fromJust)
 import Path
     ( Dir
     , File
-    , Rel
     , Path
+    , Rel
     , absdir
     , fromAbsFile
     , fromRelDir
