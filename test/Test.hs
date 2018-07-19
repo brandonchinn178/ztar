@@ -28,7 +28,7 @@ import Test.Tasty.QuickCheck (testProperty)
 
 main :: IO ()
 main = defaultMain $ testGroup "ztar"
-  [ testProperty "Create/extract uncompressed tar archives" $ testZTar 20 NoCompression
+  [ testProperty "Create/extract uncompressed tar archives" $ testZTar 25 NoCompression
   , testProperty "Create/extract GZip tar archives" $ testZTar 20 GZip
   , testProperty "Create/extract Zip archives" $ testZTar 15 Zip
   ]
@@ -99,7 +99,8 @@ arbitraryFileTree = mkFileTree Nothing (0 :: Int)
     mkFileTree dir depth = do
       paths <- nub <$> listOf arbitrary
       fmap concat $ forM paths $ \path -> do
-        isFile <- arbitrary
+        -- exponentially less likely to go into subdirectories
+        isFile <- frequency [(1, pure False), (2^depth, pure True)]
         if isFile
           then do
             Blind (ABS contents) <- arbitrary
