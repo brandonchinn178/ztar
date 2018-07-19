@@ -58,6 +58,10 @@ aliases:
         stack build ztar "${STACK_FLAGS[@]}"
 
   # test steps
+  - &run-hlint
+    run:
+      name: Run hlint
+      command: scripts/hlint.sh
   - &run-example-test
     run:
       name: Run example test
@@ -102,6 +106,15 @@ jobs:
           paths:
               - .stack-work
 
+  hlint:
+    <<: *docker-linux
+    steps:
+      - checkout
+      - *install-stack
+      - restore_cache:
+          key: *cache-key
+      - *run-hlint
+
   run-example-test:
     <<: *docker-linux
     steps:
@@ -130,6 +143,9 @@ workflows:
       - build:
           requires:
             - prebuild
+      - hlint:
+          requires:
+            - build
       - run-example-test:
           requires:
             - build
@@ -144,6 +160,9 @@ workflows:
       - build:
           requires:
             - prebuild
+      - hlint:
+          requires:
+            - build
       - run-example-test:
           requires:
             - build

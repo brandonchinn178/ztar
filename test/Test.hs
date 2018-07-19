@@ -111,17 +111,19 @@ arbitraryFileTree = mkFileTree Nothing (0 :: Int)
 newtype ValidName = ValidName { unName :: String }
   deriving (Show,Eq)
 
+{-# ANN module "HLint: ignore Use ||" #-}
 instance Arbitrary ValidName where
   arbitrary = do
     -- https://stackoverflow.com/a/2306003/8565175
     name <- take 14 <$> listOf1 (elements validChars)
-    if or
-      [ last name == '.'
-      -- https://superuser.com/questions/259703/get-mac-tar-to-stop-putting-filenames-in-tar-archives
-      , "._" `isPrefixOf` name
-      , not $ Windows.isValid name
-      ]
-      then arbitrary
-      else return $ ValidName name
+    if isValid name
+      then return $ ValidName name
+      else arbitrary
     where
       validChars = ['a'..'z'] ++ ['0'..'9'] ++ ['.', '_', '-']
+      isValid name = not $ or
+        [ last name == '.'
+        -- https://superuser.com/questions/259703/get-mac-tar-to-stop-putting-filenames-in-tar-archives
+        , "._" `isPrefixOf` name
+        , not $ Windows.isValid name
+        ]
