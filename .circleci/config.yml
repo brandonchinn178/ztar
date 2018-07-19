@@ -114,6 +114,8 @@ jobs:
     <<: *docker-linux
     steps:
       - checkout
+      - attach_workspace:
+          at: .
       - *install-stack
       - restore_cache:
           key: *cache-key
@@ -123,6 +125,8 @@ jobs:
     <<: *docker-linux
     steps:
       - checkout
+      - attach_workspace:
+          at: .
       - *install-stack
       - restore_cache:
           key: *cache-key
