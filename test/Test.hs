@@ -28,13 +28,13 @@ import Test.Tasty.QuickCheck (testProperty)
 
 main :: IO ()
 main = defaultMain $ testGroup "ztar"
-  [ testProperty "Create/extract uncompressed tar archives" $ testZTar NoCompression
-  , testProperty "Create/extract GZip tar archives" $ testZTar GZip
-  , testProperty "Create/extract Zip archives" $ testZTar Zip
+  [ testProperty "Create/extract uncompressed tar archives" $ testZTar 20 NoCompression
+  , testProperty "Create/extract GZip tar archives" $ testZTar 20 GZip
+  , testProperty "Create/extract Zip archives" $ testZTar 15 Zip
   ]
 
-testZTar :: Compression -> Property
-testZTar compression = monadicIO $ do
+testZTar :: Int -> Compression -> Property
+testZTar n compression = withMaxSuccess n $ monadicIO $ do
   [archive, src, dest] <- pick $ uniqueListOf 3 arbitrary
   files <- pick arbitraryFileTree
 
