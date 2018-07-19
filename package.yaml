@@ -69,7 +69,7 @@ tests:
       base:
       bytestring:
       bytestring-arbitrary:
-      extra:
+      filepath:
       path:
       path-io:
       QuickCheck:
