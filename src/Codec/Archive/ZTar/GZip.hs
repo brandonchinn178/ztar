@@ -6,7 +6,6 @@ Portability :  portable
 
 Functions to create/extract GZIP-compressed archives.
 -}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE ViewPatterns #-}
 

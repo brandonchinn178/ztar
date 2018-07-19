@@ -6,8 +6,6 @@ Portability :  portable
 
 Functions to create/extract uncompressed tar archives.
 -}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE ViewPatterns #-}
 

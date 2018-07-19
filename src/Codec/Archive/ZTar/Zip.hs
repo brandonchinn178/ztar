@@ -21,11 +21,11 @@ import qualified Codec.Archive.Zip as Zip
 import Control.Monad.IO.Class (liftIO)
 import Data.ByteString.Lazy (ByteString)
 import qualified Data.ByteString.Lazy as BS
-import Path (parseAbsFile, parseAbsDir, parseRelFile)
+import Path (parseAbsDir, parseAbsFile, parseRelFile)
 import System.Directory
     ( createDirectoryIfMissing
-    , doesFileExist
     , doesDirectoryExist
+    , doesFileExist
     , listDirectory
     , makeAbsolute
     , withCurrentDirectory
