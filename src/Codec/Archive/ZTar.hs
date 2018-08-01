@@ -71,6 +71,7 @@ extract archive dir = BS.readFile archive >>= \case
   Tar.TarFormat -> Tar.extract archive dir
   GZip.GZipFormat -> GZip.extract archive dir
   Zip.ZipFormat -> Zip.extract archive dir
+  "" -> fail $ "Trying to extract empty file: " ++ archive
   _ -> fail $ "Could not recognize archive format: " ++ archive
 
 -- | Same as 'extract' but using Path types.
