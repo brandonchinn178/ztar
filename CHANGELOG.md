@@ -1,3 +1,8 @@
+# ztar 1.0.1
+
+Changes:
+* Allow up to `zip-1.2.0`
+
 # ztar 1.0.0
 
 Breaking changes:
