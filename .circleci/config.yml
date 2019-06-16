@@ -39,8 +39,9 @@ aliases:
           package.yaml
         )
         cat "${FILES[@]}" > cache-key.txt
+        curl -sSL https://get.haskellstack.org/ | sed -n 's/^STACK_VERSION="\(.*\)"/\1/p' >> cache-key.txt
   - &cache-key
-    v1-{{ checksum "cache-key.txt" }}
+    v2-{{ checksum "cache-key.txt" }}
   - &install-stack-deps
     run:
       name: Build external dependencies
@@ -104,6 +105,7 @@ jobs:
           key: *cache-key
           paths:
             - ~/.stack
+            - ~/.local
       - *run-build
       - persist_to_workspace:
           root: .
