@@ -73,7 +73,7 @@ create archive base paths = do
     searchDir :: FilePath -> IO [FilePath]
     searchDir path =
       let mkPath = if path == "." then id else (path </>)
-      in concatMapM (search . mkPath) =<< liftIO (listDirectory path)
+      in concatMapM (search . mkPath) =<< listDirectory path
     insertFile path = do
       path' <- Zip.mkEntrySelector path
       Zip.loadEntry Zip.BZip2 path' path
