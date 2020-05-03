@@ -1,3 +1,8 @@
+# ztar 1.0.2
+
+Changes:
+* Support GHC 8.8
+
 # ztar 1.0.1
 
 Changes:
