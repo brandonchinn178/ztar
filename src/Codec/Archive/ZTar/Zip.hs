@@ -18,7 +18,7 @@ module Codec.Archive.ZTar.Zip
   ) where
 
 import qualified Codec.Archive.Zip as Zip
-import Control.Monad.Extra (concatMapM)
+import Control.Monad (liftM)
 import Control.Monad.IO.Class (liftIO)
 import Data.ByteString.Lazy (ByteString)
 import qualified Data.ByteString.Lazy as BS
@@ -77,6 +77,7 @@ create archive base paths = do
     insertFile path = do
       path' <- Zip.mkEntrySelector path
       Zip.loadEntry Zip.BZip2 path' path
+    concatMapM f = liftM concat . mapM f
 
 -- | Extract all the files contained in an archive compressed with Zip.
 --
