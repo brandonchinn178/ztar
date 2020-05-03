@@ -19,7 +19,6 @@ module Codec.Archive.ZTar.Zip
 
 import qualified Codec.Archive.Zip as Zip
 import Control.Monad (liftM)
-import Control.Monad.IO.Class (liftIO)
 import Data.ByteString.Lazy (ByteString)
 import qualified Data.ByteString.Lazy as BS
 import System.Directory
