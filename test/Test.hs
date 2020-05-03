@@ -3,7 +3,6 @@
 import Codec.Archive.ZTar
 import Control.Monad (forM, forM_)
 import qualified Data.ByteString as BS
-import Data.ByteString.Arbitrary (ArbByteString(..))
 import Data.List (isPrefixOf, nub)
 import Data.Maybe (fromJust)
 import Path
@@ -22,6 +21,7 @@ import Path
 import Path.IO (doesFileExist, ensureDir, isLocationOccupied, withTempDir)
 import qualified System.FilePath.Windows as Windows
 import Test.QuickCheck
+import Test.QuickCheck.Instances.ByteString ()
 import Test.QuickCheck.Monadic
 import Test.Tasty (defaultMain, testGroup)
 import Test.Tasty.QuickCheck (testProperty)
@@ -103,7 +103,7 @@ arbitraryFileTree = mkFileTree Nothing (0 :: Int)
         isFile <- frequency [(1, pure False), (2^depth, pure True)]
         if isFile
           then do
-            Blind (ABS contents) <- arbitrary
+            Blind contents <- arbitrary
             return [(dir `maybeSlash` toRelFile path, contents)]
           else mkFileTree (Just $ dir `maybeSlash` toRelDir path) (depth + 1)
 

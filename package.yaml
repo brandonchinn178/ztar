@@ -28,6 +28,8 @@ when:
       - -Wincomplete-record-updates
       - -Wincomplete-uni-patterns
       - -Wnoncanonical-monad-instances
+  - condition: impl(ghc <= 8.6)
+    ghc-options:
       - -Wnoncanonical-monadfail-instances
 
 library:
@@ -69,11 +71,11 @@ tests:
     dependencies:
       base:
       bytestring:
-      bytestring-arbitrary:
       filepath:
       path:
       path-io:
       QuickCheck:
+      quickcheck-instances:
       tasty:
       tasty-quickcheck:
       ztar:
