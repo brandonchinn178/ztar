@@ -18,6 +18,7 @@ module Codec.Archive.ZTar.Zip
   ) where
 
 import qualified Codec.Archive.Zip as Zip
+import Control.Monad.Extra (concatMapM)
 import Control.Monad.IO.Class (liftIO)
 import Data.ByteString.Lazy (ByteString)
 import qualified Data.ByteString.Lazy as BS
@@ -57,21 +58,25 @@ create :: FilePath -- ^ archive to create
        -> IO ()
 create archive base paths = do
   archive' <- makeAbsolute archive
-  withCurrentDirectory base $ Zip.createArchive archive' $ mapM_ insert paths
+  withCurrentDirectory base $ do
+    files <- concatMapM search paths
+    Zip.createArchive archive' $ mapM_ insertFile files
   where
-    insert path = do
-      isFile <- liftIO $ doesFileExist path
-      isDir <- liftIO $ doesDirectoryExist path
+    search :: FilePath -> IO [FilePath]
+    search path = do
+      isFile <- doesFileExist path
+      isDir <- doesDirectoryExist path
       if
-        | isFile -> insertFile path
-        | isDir -> insertDir path
+        | isFile -> pure [path]
+        | isDir -> searchDir path
         | otherwise -> fail $ "Path does not exist: " ++ path
+    searchDir :: FilePath -> IO [FilePath]
+    searchDir path =
+      let mkPath = if path == "." then id else (path </>)
+      in concatMapM (search . mkPath) =<< liftIO (listDirectory path)
     insertFile path = do
       path' <- Zip.mkEntrySelector path
       Zip.loadEntry Zip.BZip2 path' path
-    insertDir path =
-      let mkPath = if path == "." then id else (path </>)
-      in mapM_ (insert . mkPath) =<< liftIO (listDirectory path)
 
 -- | Extract all the files contained in an archive compressed with Zip.
 --
