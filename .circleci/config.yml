@@ -1,16 +1,6 @@
 version: 2
 
 aliases:
-  # CircleCI
-  - &nightly-only
-    triggers:
-      - schedule:
-          cron: "0 8 * * *"  # midnight PST
-          filters:
-            branches:
-              only:
-                - master
-
   # build environment
   - &docker-linux
     docker:
@@ -157,26 +147,6 @@ workflows:
   version: 2
 
   build_and_test:
-    jobs:
-      - prebuild
-      - build:
-          requires:
-            - prebuild
-      - hlint:
-          requires:
-            - build
-      - stylish-haskell:
-          requires:
-            - build
-      - run-example-test:
-          requires:
-            - build
-      - run-integration-tests:
-          requires:
-            - build
-
-  nightly:
-    <<: *nightly-only
     jobs:
       - prebuild
       - build:
