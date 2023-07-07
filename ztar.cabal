@@ -63,9 +63,9 @@ library
 
 test-suite example
   type: exitcode-stdio-1.0
-  main-is: Example.hs
-  hs-source-dirs:
-      test
+  main-is: test/Example.hs
+  other-modules:
+      Paths_ztar
   ghc-options: -Wall
   build-depends:
       base
@@ -82,9 +82,9 @@ test-suite example
 
 test-suite ztar-test
   type: exitcode-stdio-1.0
-  main-is: Test.hs
-  hs-source-dirs:
-      test
+  main-is: test/Test.hs
+  other-modules:
+      Paths_ztar
   ghc-options: -Wall
   build-depends:
       QuickCheck
